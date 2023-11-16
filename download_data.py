@@ -35,11 +35,17 @@ def load_problem_statements():
     for problem_id, problem_info in tqdm(list(problems_df.iterrows())):
         contest_id = problem_info['contestId']
         index = problem_info['index']
+        filename = STATEMENTS_DIR / ("%d.gz" % (int(problem_id),))
+        if filename.exists():
+            continue
         problem_page_url = "https://codeforces.com/contest/%d/problem/%s" % (contest_id, index)
         raw_page = requests.get(problem_page_url).text
-        statement = problem_page_parser.parse_problem(raw_page)['statement']
-        with gzip.open(STATEMENTS_DIR / ("%d.gz" % (int(problem_id),)), mode='wt', encoding="utf-8") as output_file:
-            print(statement, file=output_file)
+        try:
+            statement = problem_page_parser.parse_problem(raw_page)['statement']
+            with gzip.open(filename, mode='wt', encoding="utf-8") as output_file:
+                print(statement, file=output_file)
+        except:
+            continue
 
 
 def main():
